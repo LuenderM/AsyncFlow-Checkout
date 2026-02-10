@@ -1,7 +1,7 @@
 services:
   # PostgreSQL
   postgres:
-    image: 'postgres:latest'
+    image: 'postgres:17'
     environment:
       - 'POSTGRES_DB=asyncflow_db'
       - 'POSTGRES_PASSWORD=secret'
