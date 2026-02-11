@@ -18,20 +18,28 @@ public class OrderConsumer {
     private final OrderRepository orderRepository;
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_NAME)
-    public void processOrder(UUID orderId) {
-        log.info("Worker recebeu o pedido: {}", orderId);
+    public void processOrder(String payload) {
+        log.info("Worker recebeu o payload: {}", payload);
 
-        orderRepository.findById(orderId).ifPresent(order -> {
-            order.setStatus(OrderStatus.APPROVED);
-            orderRepository.save(order);
-            log.info("Pedido aprovado e atualizado no banco!");
-        });
+        try {
+            UUID orderId = UUID.fromString(payload);
 
+            orderRepository.findById(orderId).ifPresent(order -> {
+                order.setStatus(OrderStatus.APPROVED);
+                orderRepository.save(order);
+                log.info("Pedido {} aprovado e atualizado no banco!", orderId);
+            });
+
+        } catch (IllegalArgumentException e) {
+            log.error("Payload inválido recebido na fila: {}", payload);
+        }
+
+        // Simulação de delay
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.warn("Interrupção durante simulação de processamento: {}", e.getMessage());
+            log.warn("Interrupção: {}", e.getMessage());
         }
     }
 }

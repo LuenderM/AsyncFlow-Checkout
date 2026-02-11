@@ -29,7 +29,7 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_NAME, savedOrder.getId());
+        rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_NAME, savedOrder.getId().toString());
 
         return new OrderResponse(
                 savedOrder.getId(),
