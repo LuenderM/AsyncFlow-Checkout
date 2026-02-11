@@ -1,4 +1,4 @@
-package com.asyncflow.checkout_api;
+package com.asyncflow.checkout.api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

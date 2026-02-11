@@ -8,7 +8,6 @@ public class AsyncFlowCheckoutApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(AsyncFlowCheckoutApplication.class, args);
-		System.out.println("AsyncFlowCheckoutApplication started...");
 	}
 
 }
