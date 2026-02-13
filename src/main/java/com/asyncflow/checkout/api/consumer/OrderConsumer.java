@@ -34,7 +34,7 @@ public class OrderConsumer {
             log.error("Payload inválido recebido na fila: {}", payload);
         }
 
-        // Simulação de delay
+        // Simulação de delay / gerar uma nota fiscal/chamar gateway de pagamento - RECOMENDO REMOVER
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
