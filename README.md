@@ -14,7 +14,7 @@
 
 O sistema resolve o problema de lentidão em checkouts tradicionais desacoplando o recebimento do pedido do seu processamento.
 
-![Architecture Diagram](caminho-para-sua-imagem-do-excalidraw.png)
+![Architecture Diagram](docs/diagrama.png)
 
 1.  **API (Producer):** Recebe o pedido, salva o estado inicial (`PENDING`) e publica o ID na fila. Tempo de resposta: **~5ms**.
 2.  **RabbitMQ:** Atua como buffer (amortecedor), garantindo que nenhum pedido seja perdido mesmo sob alta carga.
