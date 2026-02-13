@@ -1,64 +1,91 @@
-# AsyncFlow Checkout API 🛒
+# 🚀 AsyncFlow Checkout API
 
-API de E-commerce de alta performance focada em **processamento assíncrono** de pedidos para suportar picos de tráfego (como Black Friday).
+![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=java)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4-green?style=for-the-badge&logo=spring-boot)
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-Messaging-orange?style=for-the-badge&logo=rabbitmq)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue?style=for-the-badge&logo=postgresql)
+![Docker](https://img.shields.io/badge/Docker-Container-blue?style=for-the-badge&logo=docker)
 
-![Java](https://img.shields.io/badge/Java-21-orange)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3-green)
-![RabbitMQ](https://img.shields.io/badge/RabbitMQ-Messaging-orange)
-![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+> Um sistema de checkout de alta performance, resiliente e escalável, projetado com Arquitetura Orientada a Eventos para suportar picos de tráfego (Black Friday) sem bloquear o cliente.
 
-## 🚀 O Problema vs. Solução
+---
 
-E-commerces tradicionais travam quando milhares de usuários clicam em "Comprar" ao mesmo tempo, pois tentam processar pagamento, estoque e email de forma síncrona (tudo na mesma requisição).
+## 🏗️ Arquitetura
 
-O **AsyncFlow** resolve isso implementando uma Arquitetura Orientada a Eventos:
-1.  **API (Producer):** Recebe o pedido, salva como `PENDING` e joga em uma fila (RabbitMQ). Resposta imediata ao cliente (ms).
-2.  **Worker (Consumer):** Processa os pedidos da fila em background, controlando a carga no banco de dados.
+O sistema resolve o problema de lentidão em checkouts tradicionais desacoplando o recebimento do pedido do seu processamento.
 
-## 🛠️ Tech Stack
+![Architecture Diagram](caminho-para-sua-imagem-do-excalidraw.png)
 
-* **Linguagem:** Java 21
-* **Framework:** Spring Boot 4
-* **Mensageria:** RabbitMQ (Dockerizado)
-* **Banco de Dados:** PostgreSQL (Dockerizado)
-* **Infraestrutura:** Docker Compose
-* **Cloud (Futuro):** AWS S3 para armazenamento de imagens
+1.  **API (Producer):** Recebe o pedido, salva o estado inicial (`PENDING`) e publica o ID na fila. Tempo de resposta: **~5ms**.
+2.  **RabbitMQ:** Atua como buffer (amortecedor), garantindo que nenhum pedido seja perdido mesmo sob alta carga.
+3.  **Worker (Consumer):** Processa os pedidos em background de forma controlada, atualizando o status para `APPROVED`.
 
-## ⚙️ Como Rodar Localmente
+---
+
+## ⚡ Performance (Load Test)
+
+Testes de carga realizados com **K6** simulando 50 usuários simultâneos (Virtual Users).
+
+| Métrica | Resultado |
+| :--- | :--- |
+| **Requisições Totais** | 915 (em 40s) |
+| **Taxa de Erro** | 0.00% |
+| **Latência Média (API)** | **5.04ms** 🚀 |
+| **Processamento Assíncrono** | 100% enfileirado |
+
+---
+
+## 🛠️ Tecnologias
+
+* **Core:** Java 21, Spring Boot 4
+* **Database:** PostgreSQL 17
+* **Message Broker:** RabbitMQ
+* **Containerization:** Docker & Docker Compose
+* **Testing:** K6 (Load Testing), JUnit 5
+
+---
+
+## 🚀 Como Rodar
 
 ### Pré-requisitos
-* Docker & Docker Desktop instalados e rodando.
-* Java 21 instalado.
+* Docker & Docker Compose
+* Java 21 (Opcional, se quiser rodar fora do Docker)
 
 ### Passo a Passo
 
 1.  **Clone o repositório:**
     ```bash
-    git clone [https://github.com/LuenderM/AsyncFlow-Checkout.git](https://github.com/LuenderM/AsyncFlow-Checkout.git)
-    cd AsyncFlow-Checkout
+    git clone [https://github.com/seu-usuario/asyncflow-checkout.git](https://github.com/seu-usuario/asyncflow-checkout.git)
+    cd asyncflow-checkout
     ```
 
-2.  **Suba a Infraestrutura (Banco + Fila):**
+2.  **Suba a infraestrutura (RabbitMQ + Postgres):**
     ```bash
     docker compose up -d
     ```
 
-3.  **Configure o Ambiente:**
-    * Renomeie o arquivo `src/main/resources/application.properties.example` para `application.properties`.
-    * As configurações padrão já conectam no Docker local (`localhost:5432` e `localhost:5672`).
-
-4.  **Execute a Aplicação:**
+3.  **Execute a aplicação:**
     ```bash
     ./mvnw spring-boot:run
     ```
 
-## 🗺️ Roadmap
-- [x] Configuração Docker (Postgres + RabbitMQ)
-- [x] Estrutura Inicial Spring Boot
-- [ ] Endpoint de Criação de Pedidos (Producer)
-- [ ] Worker de Processamento (Consumer)
-- [ ] Integração AWS S3
-- [ ] Frontend (React/Next.js)
+4.  **Acesse a documentação ou teste:**
+    * API rodando em: `http://localhost:8080`
+    * RabbitMQ Management: `http://localhost:15672` (Login: guest/guest)
 
 ---
-Desenvolvido por [Luender Meira](https://www.linkedin.com/in/luender/)
+
+## 🔌 Endpoints
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `POST` | `/orders` | Cria um novo pedido (Assíncrono). Retorna `202 Accepted`. |
+| `GET` | `/orders/{id}` | Consulta o status do pedido (`PENDING` -> `APPROVED`). |
+
+**Exemplo de Payload (POST):**
+```json
+{
+  "productCode": "NOTEBOOK-GAMER",
+  "quantity": 1,
+  "price": 3500.00
+}
