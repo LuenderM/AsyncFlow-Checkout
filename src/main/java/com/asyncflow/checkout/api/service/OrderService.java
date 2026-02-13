@@ -11,6 +11,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,5 +37,15 @@ public class OrderService {
                 savedOrder.getStatus().name(),
                 "Pedido recebido e aguardando processamento"
         );
+    }
+
+    public OrderResponse findById(UUID id) {
+        return orderRepository.findById(id)
+                .map(order -> new OrderResponse(
+                        order.getId(),
+                        order.getStatus().name(),
+                        "Status atual do pedido"
+                ))
+                .orElseThrow(() -> new RuntimeException("Pedido não encontrado com ID: " + id));
     }
 }
